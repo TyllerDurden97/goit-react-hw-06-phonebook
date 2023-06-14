@@ -1,9 +1,11 @@
 import React from "react";
 import PropTypes from 'prop-types';
 import css from 'components/ContactList/ContactList.module.css';
+import { filteredNamesArr } from "redux/selectors";
+import { useSelector } from "react-redux";
 
-
-export const ContactList = ({ filteredNames, onDeleteContact }) => {
+export const ContactList = ({  onDeleteContact }) => {
+   const  filteredNames  = useSelector(filteredNamesArr);
 
    return( 
    <ul className={css.contactsList}>

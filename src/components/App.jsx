@@ -1,22 +1,19 @@
-import { React, useState, useEffect } from "react";
+import { React } from "react";
 import { nanoid } from 'nanoid';
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import { Filter } from 'components/Filter/Filter';
 import { ContactForm } from 'components/ContactForm/ContactForm';
 import { ContactList } from 'components/ContactList/ContactList';
+import { phonebookSelector } from "redux/selectors";
 import css from 'components/App.module.css';
+import { useDispatch, useSelector } from "react-redux";
+import { addContact, filterContacts, deleteContact } from "redux/phonebookSlice";
 
 
 export const App = () => {
 
-   const [contacts, setContacts] = useState(() =>
-      JSON.parse(localStorage.getItem('contacts')) ?? []);
-   const [filter, setFilter] = useState('');
-
-   useEffect(() => {
-      localStorage.setItem('contacts', JSON.stringify(contacts))
-   }, [contacts]);
-
+   const { contacts } = useSelector(phonebookSelector);
+   const dispatch = useDispatch();
    const formSubmitData = (name, number) => {
       const newContact = {
          name,
@@ -29,23 +26,17 @@ export const App = () => {
       if (filteredContact) {
          return Notify.info(`${name} is already in Contacts`)
       } else {
-         setContacts((prevContacts) => (
-            [newContact, ...prevContacts]
-         ));
+         dispatch(addContact(newContact))
       };
    };
    
-      const handleFilterChange = (e) => {
-        setFilter(e.currentTarget.value)
+   const handleFilterChange = (e) => {
+      dispatch(filterContacts(e.currentTarget.value))
       };      
 
-      const deleteContact = contactId => {
-         setContacts(prevContacts => (
-            prevContacts.filter(contact => contact.id !== contactId)
-      ));
+   const deleteContactFromList = contactId => {
+      dispatch(deleteContact(contactId))
    };
-   const filteredNames = contacts.filter(contact =>
-         contact.name.toLowerCase().includes(filter.toLowerCase()));
    
    return (
       <div className={css.pageWrap}>
@@ -55,8 +46,10 @@ export const App = () => {
          />
          <h2 className={css.title}>Contacts</h2>
          <div className={css.contactsArea}>
-            <Filter value={filter} onChange={handleFilterChange} />
-            <ContactList filteredNames={filteredNames} filter={filter} contacts={contacts} onDeleteContact={deleteContact} />
+            <Filter
+               onChange={handleFilterChange} />
+            <ContactList
+               onDeleteContact={deleteContactFromList} />
          </div>
       </div>
    );           
